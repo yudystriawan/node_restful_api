@@ -68,7 +68,7 @@ export class AuthController {
     })
     newUserRequest: Credentials,
   ): Promise<User> {
-    newUserRequest.role = 'owner';
+    newUserRequest.role = 'user';
 
     validateCredentials(_.pick(newUserRequest, ['email', 'password']));
 
