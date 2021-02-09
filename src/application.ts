@@ -1,12 +1,12 @@
-import {AuthenticationComponent} from '@loopback/authentication';
+import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
 import {AuthorizationComponent} from '@loopback/authorization';
 import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
+import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
-  RestExplorerComponent,
+  RestExplorerComponent
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
@@ -14,10 +14,11 @@ import {
   PasswordHasherBindings,
   TokenServiceBindings,
   TokenServiceConstants,
-  UserServiceBindings,
+  UserServiceBindings
 } from './keys';
 import {MySequence} from './sequence';
 import {BycryptHasher, JwtService, MyUserService} from './services';
+import {JwtAuthenticationStrategy} from './strategies/jwt-strategy';
 
 export {ApplicationConfig};
 
@@ -41,6 +42,9 @@ export class NodeRestfulApiApplication extends BootMixin(
 
     this.component(AuthenticationComponent);
     this.component(AuthorizationComponent);
+
+    this.add(createBindingFromClass(JwtAuthenticationStrategy));
+    registerAuthenticationStrategy(this, JwtAuthenticationStrategy);
 
     this.setupBindings();
 
