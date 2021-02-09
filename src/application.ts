@@ -1,12 +1,15 @@
-import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
+import {
+  AuthenticationComponent,
+  registerAuthenticationStrategy,
+} from '@loopback/authentication';
 import {AuthorizationComponent} from '@loopback/authorization';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
 import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
+import {OpenApiSpec, RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
-  RestExplorerComponent
+  RestExplorerComponent,
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
@@ -14,11 +17,12 @@ import {
   PasswordHasherBindings,
   TokenServiceBindings,
   TokenServiceConstants,
-  UserServiceBindings
+  UserServiceBindings,
 } from './keys';
 import {MySequence} from './sequence';
 import {BycryptHasher, JwtService, MyUserService} from './services';
 import {JwtAuthenticationStrategy} from './strategies/jwt-strategy';
+import {SECURITY_SCHEME_SPEC, SECURITY_SPEC} from './utils/security.spec';
 
 export {ApplicationConfig};
 
@@ -58,6 +62,16 @@ export class NodeRestfulApiApplication extends BootMixin(
         nested: true,
       },
     };
+
+    const spec: OpenApiSpec = {
+      openapi: '3.0.0',
+      info: {title: 'pkg.name', version: 'pkg.version'},
+      paths: {},
+      components: {securitySchemes: SECURITY_SCHEME_SPEC},
+      servers: [{url: '/api'}],
+      security: SECURITY_SPEC,
+    };
+    this.api(spec);
   }
 
   private setupBindings(): void {
