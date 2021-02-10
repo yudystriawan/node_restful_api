@@ -21,7 +21,7 @@ import {
 } from '../keys';
 import {User, UserRoles} from '../models';
 import {Credentials, UserRepository} from '../repositories';
-import {PasswordHasher, validateCredentials} from '../services';
+import {EmailService, PasswordHasher, validateCredentials} from '../services';
 import {CredentialsRequestBody} from './specs/auth.specs';
 
 @model()
@@ -43,6 +43,8 @@ export class AuthController {
     public jwtService: TokenService,
     @inject(UserServiceBindings.USER_SERVICE)
     public userService: UserService<User, Credentials>,
+    @inject('services.EmailService')
+    public emailService: EmailService,
   ) {}
 
   @post('sign-up')
@@ -79,6 +81,8 @@ export class AuthController {
     const savedUser = await this.userRepository.create(
       _.omit(newUserRequest, 'password'),
     );
+
+    await this.emailService.sendConfirmationMail(savedUser);
 
     await this.userRepository.userCredentials(savedUser.id).create({password});
 
