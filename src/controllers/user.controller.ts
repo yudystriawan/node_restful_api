@@ -1,7 +1,8 @@
 // Uncomment these imports to begin using these cool features!
 
+import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {param, post, response} from '@loopback/rest';
+import {get, HttpErrors, param, Response, RestBindings} from '@loopback/rest';
 import {UserRepository} from '../repositories';
 
 // import {inject} from '@loopback/core';
@@ -12,33 +13,17 @@ export class UserController {
     public userRepository: UserRepository,
   ) {}
 
-  @post('users/verification-email/{verificationToken}')
-  @response(200, {
-    description: 'Verification email user',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-            },
-          },
-        },
-      },
-    },
-  })
+  @get('users/verification-email/{verificationToken}')
   async verificationEmail(
     @param.path.string('verificationToken') verificationToken: string,
-  ): Promise<{status: string}> {
+    @inject(RestBindings.Http.RESPONSE) res: Response,
+  ) {
     const user = await this.userRepository.findOne({
       where: {verificationToken},
     });
 
     if (!user) {
-      return {
-        status: 'FAILED',
-      };
+      throw new HttpErrors.UnprocessableEntity(`User not found`);
     }
 
     user.verificationToken = undefined;
@@ -46,6 +31,6 @@ export class UserController {
 
     await this.userRepository.updateById(user.id, user);
 
-    return {status: 'SUCCESS'};
+    res.redirect('/');
   }
 }
