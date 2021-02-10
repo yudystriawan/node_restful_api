@@ -1,5 +1,11 @@
-import {Entity, model, property, hasOne} from '@loopback/repository';
-import {UserCredentials} from './user-credentials.model';
+import {Entity, hasOne, model, property} from '@loopback/repository';
+import {UserCredentials} from '.';
+
+export enum UserRoles {
+  CUSTOMER = 'customer',
+  OWNER = 'owner',
+  ADMIN = 'admin',
+}
 
 @model()
 export class User extends Entity {
@@ -14,24 +20,31 @@ export class User extends Entity {
     type: 'string',
     required: true,
   })
-  email: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
   name: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  username: string;
+  email: string;
 
   @property({
     type: 'string',
   })
   role?: string;
+
+  @property({
+    type: 'boolean',
+    default: false,
+  })
+  verified?: boolean;
+
+  @property({
+    type: 'string',
+    defaultFn: 'uuidv4',
+    hidden: true,
+  })
+  verificationToken?: string;
 
   @hasOne(() => UserCredentials)
   userCredentials: UserCredentials;

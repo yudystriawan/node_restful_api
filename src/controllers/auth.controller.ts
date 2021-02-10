@@ -19,7 +19,7 @@ import {
   TokenServiceBindings,
   UserServiceBindings,
 } from '../keys';
-import {User} from '../models';
+import {User, UserRoles} from '../models';
 import {Credentials, UserRepository} from '../repositories';
 import {PasswordHasher, validateCredentials} from '../services';
 import {CredentialsRequestBody} from './specs/auth.specs';
@@ -61,14 +61,14 @@ export class AuthController {
       content: {
         'application/json': {
           schema: getModelSchemaRef(NewUserRequest, {
-            exclude: ['id', 'role'],
+            exclude: ['id', 'role', 'verificationToken', 'verified'],
           }),
         },
       },
     })
     newUserRequest: Credentials,
   ): Promise<User> {
-    newUserRequest.role = 'user';
+    newUserRequest.role = UserRoles.CUSTOMER;
 
     validateCredentials(_.pick(newUserRequest, ['email', 'password']));
 
@@ -119,7 +119,9 @@ export class AuthController {
     description: 'Get current user',
     content: {
       'application/json': {
-        schema: getModelSchemaRef(User),
+        schema: getModelSchemaRef(User, {
+          exclude: ['verificationToken'],
+        }),
       },
     },
   })
